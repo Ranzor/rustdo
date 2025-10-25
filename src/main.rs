@@ -2,6 +2,7 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs;
+use std::io::{self, Write};
 use std::path::Path;
 
 #[derive(Serialize, Deserialize)]
@@ -47,6 +48,32 @@ fn main() {
                 serde_json::to_string_pretty(&todos).expect("Unable to serialize todos to JSON");
             fs::write(todo_file, json).expect("Unable to write todo file");
         }
+        "remove" | "r" => {
+            if args.len() < 3 {
+                println!("Please provide the task number to remove.");
+                return;
+            }
+
+            let task_num: usize = match args[2].parse() {
+                Ok(num) => num,
+                Err(_) => {
+                    println!("Please provide a valid task number.");
+                    return;
+                }
+            };
+            if task_num == 0 || task_num > todos.len() {
+                println!("Invalid task number. Use 'list' to see available tasks.");
+                return;
+            }
+            let index = task_num - 1;
+
+            let removed = todos.remove(index);
+            println!("Removed task: {}", removed.task);
+
+            let json = serde_json::to_string_pretty(&todos).expect("Failed to serialize todos");
+            fs::write(todo_file, json).expect("Failed to write todo file");
+        }
+
         "list" | "l" => {
             if todos.is_empty() {
                 println!("No tasks yet!");
@@ -80,8 +107,66 @@ fn main() {
             }
             let index = task_num - 1;
 
-            todos[index].completed = true;
-            println!(" Completed: {}", todos[index].task);
+            todos[index].completed = !todos[index].completed;
+            if todos[index].completed {
+                println!(
+                    "{}: {}",
+                    "Completed".bright_green(),
+                    todos[index].task.bright_cyan()
+                );
+            } else {
+                println!(
+                    "{}: {}",
+                    "Marked as incomplete".red(),
+                    todos[index].task.bright_cyan()
+                );
+            }
+
+            let json = serde_json::to_string_pretty(&todos).expect("Failed to serialize todos");
+            fs::write(todo_file, json).expect("Failed to write todo file");
+        }
+        "clear" | "c" => {
+            let completed: Vec<_> = todos.iter().filter(|todo| todo.completed).collect();
+
+            if completed.is_empty() {
+                println!("Nothing to clear");
+                return;
+            }
+
+            let skip_confirm = args.len() > 2 && args[2] == "-y";
+
+            if !skip_confirm {
+                // show the task and get confirmation
+                println!("The following tasks will be removed:");
+
+                for (i, todo) in completed.iter().enumerate() {
+                    let status = if todo.completed {
+                        "✓".bright_green()
+                    } else {
+                        " ".red()
+                    };
+                    println!("[{}] {}", status, todo.task.bright_cyan());
+                }
+                println!("Remove these {} tasks? (y/n)", completed.len());
+                loop {
+                    io::stdout().flush().expect("Failed to flush stdout");
+                    let mut input = String::new();
+                    io::stdin()
+                        .read_line(&mut input)
+                        .expect("Failed to... read input?");
+
+                    match input.trim().to_lowercase().as_str() {
+                        "y" | "yes" | "" => break,
+                        "n" | "no" => {
+                            println!("Cancelled");
+                            return;
+                        }
+                        _ => println!("Invalid input. Please enter y or n."),
+                    }
+                }
+            }
+
+            todos.retain(|todo| !todo.completed);
 
             let json = serde_json::to_string_pretty(&todos).expect("Failed to serialize todos");
             fs::write(todo_file, json).expect("Failed to write todo file");
