@@ -12,20 +12,36 @@ struct Todo {
 }
 
 fn main() {
-    let todo_file = "todos.json";
+    let todo_file: String;
+    let mut args: Vec<String> = env::args().collect();
 
-    let mut todos: Vec<Todo> = if Path::new(todo_file).exists() {
-        let data = fs::read_to_string(todo_file).expect("Unable to read todo file");
+    if args.len() > 1
+        && (args[1].as_str().to_lowercase() == "global" || args[1].as_str().to_lowercase() == "g")
+    {
+        args.remove(1);
+        let home = dirs::home_dir().expect("Could not find home directory");
+        let global_path = home.join(".todos.json");
+        todo_file = global_path.to_str().expect("Invalid path").to_string();
+    } else {
+        if Path::new("todos.json").exists() {
+            todo_file = "todos.json".to_string();
+        } else {
+            let home = dirs::home_dir().expect("Could not find home directory");
+            let global_path = home.join(".todos.json");
+            todo_file = global_path.to_str().expect("Invalid path").to_string();
+        }
+    }
+
+    let mut todos: Vec<Todo> = if Path::new(&todo_file).exists() {
+        let data = fs::read_to_string(&todo_file).expect("Unable to read todo file");
         serde_json::from_str(&data).expect("Unable to parse JSON")
     } else {
         Vec::new()
     };
 
-    let args: Vec<String> = env::args().collect();
-
     if args.len() < 2 {
         println!("Usage: todo <command>");
-        println!("Commands: add, remove, list, done, edit, clear");
+        println!("Commands: add, remove, list, done, move, edit, clear, new, delete");
         return;
     }
 
@@ -44,7 +60,7 @@ fn main() {
             });
             println!("Added task: {}", task);
 
-            match save_todos(todo_file, &todos) {
+            match save_todos(&todo_file, &todos) {
                 Ok(()) => (),
                 Err(msg) => {
                     println!("{}", msg);
@@ -64,7 +80,7 @@ fn main() {
             let removed = todos.remove(index);
             println!("Removed task: {}", removed.task);
 
-            match save_todos(todo_file, &todos) {
+            match save_todos(&todo_file, &todos) {
                 Ok(()) => (),
                 Err(msg) => {
                     println!("{}", msg);
@@ -111,7 +127,7 @@ fn main() {
                 );
             }
 
-            match save_todos(todo_file, &todos) {
+            match save_todos(&todo_file, &todos) {
                 Ok(()) => (),
                 Err(msg) => {
                     println!("{}", msg);
@@ -150,7 +166,7 @@ fn main() {
             let task = todos.remove(index_from);
             todos.insert(index_to, task);
 
-            if let Err(msg) = save_todos(todo_file, &todos) {
+            if let Err(msg) = save_todos(&todo_file, &todos) {
                 println!("{}", msg);
                 return;
             }
@@ -184,7 +200,7 @@ fn main() {
                 println!("Updated task: {}", todos[index].task);
             }
 
-            match save_todos(todo_file, &todos) {
+            match save_todos(&todo_file, &todos) {
                 Ok(()) => (),
                 Err(msg) => {
                     println!("{}", msg);
@@ -236,7 +252,7 @@ fn main() {
 
             todos.retain(|todo| !todo.completed);
 
-            match save_todos(todo_file, &todos) {
+            match save_todos(&todo_file, &todos) {
                 Ok(()) => (),
                 Err(msg) => {
                     println!("{}", msg);
@@ -244,9 +260,58 @@ fn main() {
                 }
             }
         }
+
+        "new" | "n" => {
+            let new_file = "todos.json".to_string();
+            let todos: Vec<Todo> = if Path::new(&new_file).exists() {
+                println!("local todo list already exists");
+                return;
+            } else {
+                println!("local todo list created");
+                Vec::new()
+            };
+            match save_todos(&new_file, &todos) {
+                Ok(()) => (),
+                Err(msg) => {
+                    println!("{}", msg);
+                    return;
+                }
+            }
+        }
+
+        "delete" => {
+            println!("Delete todo list (y/N)");
+            loop {
+                io::stdout().flush().expect("Failed to flush stdout");
+                let mut input = String::new();
+                io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to... read input?");
+
+                match input.trim().to_lowercase().as_str() {
+                    "y" | "yes" => {
+                        match fs::remove_file(&todo_file) {
+                            Ok(()) => {
+                                println!("Todo list deleted");
+                                return;
+                            }
+                            Err(_) => {
+                                println!("Failed to delete file");
+                            }
+                        };
+                    }
+                    "n" | "no" | "" => {
+                        println!("Cancelled");
+                        return;
+                    }
+                    _ => println!("Invalid input. Please enter y or n."),
+                }
+            }
+        }
+
         _ => {
             println!("Unknown command: {}", command);
-            println!("Available commands: add, remove, list, done, edit, clear");
+            println!("Available commands: add, remove, list, done, move, edit, clear, new, delete");
         }
     }
 }
