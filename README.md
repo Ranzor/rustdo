@@ -17,7 +17,7 @@ A fast, efficient command-line todo list manager written in Rust. Supports both 
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Ranzor/rustdo.git
 cd rustdo
 
 # Build the project
@@ -135,7 +135,6 @@ rustdo list                   # Shows global list
 
 Tasks are displayed with color-coded status indicators:
 - ✓ **Green checkmark** - Completed tasks
-- **Red space** - Incomplete tasks
 - **Cyan text** - Task descriptions
 
 Status messages use color for clarity:
