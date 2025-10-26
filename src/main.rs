@@ -25,7 +25,7 @@ fn main() {
 
     if args.len() < 2 {
         println!("Usage: todo <command>");
-        println!("Commands: add, list, done");
+        println!("Commands: add, remove, list, done, edit, clear");
         return;
     }
 
@@ -210,7 +210,7 @@ fn main() {
         }
         _ => {
             println!("Unknown command: {}", command);
-            println!("Available commands: add, list");
+            println!("Available commands: add, remove, list, done, edit, clear");
         }
     }
 }
