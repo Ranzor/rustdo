@@ -198,7 +198,7 @@ rustdo e 2 "Fixed typo in task"
 
 ## License
 
-[Your chosen license]
+GPL-2.0
 
 ## Contributing
 
