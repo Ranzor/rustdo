@@ -120,6 +120,42 @@ fn main() {
             }
         }
 
+        "move" | "m" => {
+            if args.len() < 4 {
+                println!("Usage: rustdo move <from> <to>");
+                return;
+            }
+            let index_from = match get_task_index(&args, &todos) {
+                Ok(idx) => idx,
+                Err(msg) => {
+                    println!("{}", msg);
+                    return;
+                }
+            };
+
+            let mut index_to: usize = match args[3].parse() {
+                Ok(num) => num,
+                Err(_) => {
+                    println!("Please provide a valid task number.");
+                    return;
+                }
+            };
+
+            if index_to == 0 || index_to > todos.len() {
+                println!("Invalid task number. use 'list' to see available tasks.");
+                return;
+            }
+            index_to -= 1;
+
+            let task = todos.remove(index_from);
+            todos.insert(index_to, task);
+
+            if let Err(msg) = save_todos(todo_file, &todos) {
+                println!("{}", msg);
+                return;
+            }
+        }
+
         "edit" | "e" => {
             let index = match get_task_index(&args, &todos) {
                 Ok(idx) => idx,
@@ -216,7 +252,6 @@ fn main() {
 }
 
 fn get_task_index(args: &[String], todos: &[Todo]) -> Result<usize, String> {
-    // do stuff
     if args.len() < 3 {
         return Err("Please provide a task number".to_string());
     }
