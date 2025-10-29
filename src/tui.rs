@@ -120,7 +120,7 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
                         mode = Mode::Adding(String::new());
                     }
-                    if key.code == KeyCode::Char('d') {
+                    if key.code == KeyCode::Char('d') && !todos.is_empty() {
                         todos.remove(selected as usize);
                         selected = (selected - 1).max(0);
                         list_state.select(Some(selected as usize));
