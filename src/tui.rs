@@ -55,7 +55,7 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
             let list = List::new(items)
                 .block(Block::default().borders(Borders::ALL).title("Tasks"))
-                .highlight_style(Style::default().bg(Color::Blue).fg(Color::Black));
+                .highlight_style(Style::default().bg(Color::LightCyan).fg(Color::Black));
             let text = Paragraph::new(match &todos[selected as usize].comment {
                 Some(comment) => {
                     format!(
