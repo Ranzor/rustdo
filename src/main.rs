@@ -4,11 +4,13 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
+mod tui;
 
 #[derive(Serialize, Deserialize)]
-struct Todo {
+pub(crate) struct Todo {
     task: String,
     completed: bool,
+    comment: Option<String>,
 }
 
 fn main() {
@@ -57,6 +59,7 @@ fn main() {
             todos.push(Todo {
                 task: task.clone(),
                 completed: false,
+                comment: None,
             });
             println!("Added task: {}", task);
 
@@ -308,6 +311,11 @@ fn main() {
                 }
             }
         }
+        "tui" | "t" => {
+            if let Err(_) = tui::run_tui(todos, todo_file.clone()) {
+                println!("Failed to enter TUI mode");
+            }
+        }
 
         _ => {
             println!("Unknown command: {}", command);
@@ -334,7 +342,7 @@ fn get_task_index(args: &[String], todos: &[Todo]) -> Result<usize, String> {
     Ok(task_num - 1)
 }
 
-fn save_todos(todo_file: &str, todos: &[Todo]) -> Result<(), String> {
+pub(crate) fn save_todos(todo_file: &str, todos: &[Todo]) -> Result<(), String> {
     let json = match serde_json::to_string_pretty(&todos) {
         Ok(t) => t,
         Err(_) => {
