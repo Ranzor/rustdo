@@ -136,7 +136,7 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         input.pop();
                         todos[selected as usize].task = input.clone();
                     }
-                    KeyCode::Enter => {
+                    KeyCode::Enter | KeyCode::Esc => {
                         if input.trim().is_empty() {
                             todos.remove(selected as usize);
                             selected = (todos.len() as i32 - 1).max(0);
@@ -144,12 +144,6 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         } else {
                             let _ = save_todos(&todo_file, &todos);
                         }
-                        mode = Mode::Normal;
-                    }
-                    KeyCode::Esc => {
-                        todos.remove(selected as usize);
-                        selected = (todos.len() as i32 - 1).max(0);
-                        list_state.select(Some(selected as usize));
                         mode = Mode::Normal;
                     }
                     _ => {}
