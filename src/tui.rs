@@ -55,7 +55,7 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
             let list = List::new(items)
                 .block(Block::default().borders(Borders::ALL).title("Tasks"))
-                .highlight_style(Style::default().bg(Color::Blue));
+                .highlight_style(Style::default().bg(Color::Blue).fg(Color::Black));
             let text = Paragraph::new(match &todos[selected as usize].comment {
                 Some(comment) => {
                     format!(
@@ -75,10 +75,12 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
         if let Event::Key(key) = event::read()? {
             match mode {
                 Mode::Normal => {
-                    if key.code == KeyCode::Char('q') {
+                    if key.code == KeyCode::Char('q') || key.code == KeyCode::Esc {
                         break;
                     }
-                    if key.code == KeyCode::Char('j') && !todos.is_empty() {
+                    if key.code == KeyCode::Char('j')
+                        || key.code == KeyCode::Down && !todos.is_empty()
+                    {
                         selected += 1;
                         if selected as usize > todos.len() - 1 {
                             selected = 0;
@@ -86,7 +88,9 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         list_state.select(Some(selected as usize));
                     }
 
-                    if key.code == KeyCode::Char('k') && !todos.is_empty() {
+                    if key.code == KeyCode::Char('k')
+                        || key.code == KeyCode::Up && !todos.is_empty()
+                    {
                         selected -= 1;
                         if selected < 0 {
                             selected = todos.len() as i32 - 1;
@@ -105,16 +109,51 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         }
                     }
                     if key.code == KeyCode::Char('a') {
+                        todos.push(Todo {
+                            task: String::new(),
+                            completed: false,
+                            comment: None,
+                        });
+
+                        selected = (todos.len() - 1) as i32;
+                        list_state.select(Some(selected as usize));
+
                         mode = Mode::Adding(String::new());
-                        println!("In Add Mode");
+                    }
+                    if key.code == KeyCode::Char('d') {
+                        todos.remove(selected as usize);
+                        selected = (selected - 1).max(0);
+                        list_state.select(Some(selected as usize));
+                        let _ = save_todos(&todo_file, &todos);
                     }
                 }
-                Mode::Adding(_) => {
-                    if key.code == KeyCode::Esc {
+                Mode::Adding(ref mut input) => match key.code {
+                    KeyCode::Char(c) => {
+                        input.push(c);
+                        todos[selected as usize].task = input.clone();
+                    }
+                    KeyCode::Backspace => {
+                        input.pop();
+                        todos[selected as usize].task = input.clone();
+                    }
+                    KeyCode::Enter => {
+                        if input.trim().is_empty() {
+                            todos.remove(selected as usize);
+                            selected = (todos.len() as i32 - 1).max(0);
+                            list_state.select(Some(selected as usize));
+                        } else {
+                            let _ = save_todos(&todo_file, &todos);
+                        }
                         mode = Mode::Normal;
-                        println!("In Normal Mode");
                     }
-                }
+                    KeyCode::Esc => {
+                        todos.remove(selected as usize);
+                        selected = (todos.len() as i32 - 1).max(0);
+                        list_state.select(Some(selected as usize));
+                        mode = Mode::Normal;
+                    }
+                    _ => {}
+                },
             }
         }
     }
