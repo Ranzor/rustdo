@@ -1,5 +1,5 @@
 use crossterm::{
-    event::{self, Event, KeyCode},
+    event::{self, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
@@ -17,6 +17,7 @@ use std::io;
 enum Mode {
     Normal,
     Adding(String),
+    Editing(String),
 }
 
 pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
@@ -97,6 +98,25 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         }
                         list_state.select(Some(selected as usize));
                     }
+                    if key.code == KeyCode::Char('J') && key.modifiers.contains(KeyModifiers::SHIFT)
+                    {
+                        if (selected as usize) < todos.len() - 1 {
+                            todos.swap(selected as usize, (selected + 1) as usize);
+                            selected += 1;
+                            list_state.select(Some(selected as usize));
+                            let _ = save_todos(&todo_file, &todos);
+                        }
+                    }
+                    if key.code == KeyCode::Char('K') && key.modifiers.contains(KeyModifiers::SHIFT)
+                    {
+                        // move task up
+                        if selected > 0 {
+                            todos.swap(selected as usize, (selected - 1) as usize);
+                            selected -= 1;
+                            list_state.select(Some(selected as usize));
+                            let _ = save_todos(&todo_file, &todos);
+                        }
+                    }
                     if key.code == KeyCode::Char(' ') && !todos.is_empty() {
                         // do something
                         todos[selected as usize].completed = !todos[selected as usize].completed;
@@ -120,6 +140,10 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
                         mode = Mode::Adding(String::new());
                     }
+                    if key.code == KeyCode::Char('e') && !todos.is_empty() {
+                        let current_task = todos[selected as usize].task.clone();
+                        mode = Mode::Editing(current_task);
+                    }
                     if key.code == KeyCode::Char('d') && !todos.is_empty() {
                         todos.remove(selected as usize);
                         selected = (selected - 1).max(0);
@@ -128,6 +152,27 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                     }
                 }
                 Mode::Adding(ref mut input) => match key.code {
+                    KeyCode::Char(c) => {
+                        input.push(c);
+                        todos[selected as usize].task = input.clone();
+                    }
+                    KeyCode::Backspace => {
+                        input.pop();
+                        todos[selected as usize].task = input.clone();
+                    }
+                    KeyCode::Enter | KeyCode::Esc => {
+                        if input.trim().is_empty() {
+                            todos.remove(selected as usize);
+                            selected = (todos.len() as i32 - 1).max(0);
+                            list_state.select(Some(selected as usize));
+                        } else {
+                            let _ = save_todos(&todo_file, &todos);
+                        }
+                        mode = Mode::Normal;
+                    }
+                    _ => {}
+                },
+                Mode::Editing(ref mut input) => match key.code {
                     KeyCode::Char(c) => {
                         input.push(c);
                         todos[selected as usize].task = input.clone();
