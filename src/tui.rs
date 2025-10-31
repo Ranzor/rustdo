@@ -73,13 +73,26 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                 .highlight_style(Style::default().bg(Color::LightCyan).fg(Color::Black));
             let text = Paragraph::new(match &todos[selected as usize].comment {
                 Some(comment) => {
+                    let comment_display = if is_commenting {
+                        format!("{}_", comment)
+                    } else {
+                        comment.clone()
+                    };
                     format!(
                         "Task: {}\n\nComment: {}",
-                        todos[selected as usize].task, comment
+                        todos[selected as usize].task, comment_display
                     )
                 }
                 None => {
-                    format!("Task: {}\n\nNo Comment", todos[selected as usize].task)
+                    let comment_display = if is_commenting {
+                        "_".to_string()
+                    } else {
+                        "No Comment".to_string()
+                    };
+                    format!(
+                        "Task: {}\n\nComment: {}",
+                        todos[selected as usize].task, comment_display
+                    )
                 }
             })
             .block(Block::default().borders(Borders::ALL).title("Details"))
