@@ -10,7 +10,7 @@ use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout},
     style::{Color, Style},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph},
+    widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap},
 };
 use std::io;
 
@@ -18,6 +18,7 @@ enum Mode {
     Normal,
     Adding(String),
     Editing(String),
+    Commenting(String),
 }
 
 pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
@@ -34,6 +35,10 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
     loop {
         terminal.draw(|frame| {
+            let is_editing_task = matches!(mode, Mode::Editing(_));
+            let is_adding_task = matches!(mode, Mode::Adding(_));
+            let is_commenting = matches!(mode, Mode::Commenting(_));
+
             if todos.is_empty() {
                 let text = Paragraph::new("Press 'a' to start adding tasks")
                     .block(Block::default().borders(Borders::ALL));
@@ -48,9 +53,18 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
 
             let items: Vec<ListItem> = todos
                 .iter()
-                .map(|todo| {
+                .enumerate()
+                .map(|(i, todo)| {
                     let status = if todo.completed { "✓" } else { " " };
-                    ListItem::new(format!("[{}] {}", status, todo.task))
+
+                    let task_text = if i == selected as usize && (is_editing_task || is_adding_task)
+                    {
+                        format!("{}_", todo.task)
+                    } else {
+                        todo.task.clone()
+                    };
+
+                    ListItem::new(format!("[{}] {}", status, task_text))
                 })
                 .collect();
 
@@ -68,7 +82,8 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                     format!("Task: {}\n\nNo Comment", todos[selected as usize].task)
                 }
             })
-            .block(Block::default().borders(Borders::ALL).title("Details"));
+            .block(Block::default().borders(Borders::ALL).title("Details"))
+            .wrap(Wrap { trim: false });
             frame.render_stateful_widget(list, chunks[0], &mut list_state);
             frame.render_widget(text, chunks[1]);
         })?;
@@ -150,6 +165,13 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         list_state.select(Some(selected as usize));
                         let _ = save_todos(&todo_file, &todos);
                     }
+                    if key.code == KeyCode::Char('c')
+                        || key.code == KeyCode::Tab && !todos.is_empty()
+                    {
+                        let current_comment =
+                            todos[selected as usize].comment.clone().unwrap_or_default();
+                        mode = Mode::Commenting(current_comment);
+                    }
                 }
                 Mode::Adding(ref mut input) => match key.code {
                     KeyCode::Char(c) => {
@@ -189,6 +211,32 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                         } else {
                             let _ = save_todos(&todo_file, &todos);
                         }
+                        mode = Mode::Normal;
+                    }
+                    _ => {}
+                },
+                Mode::Commenting(ref mut input) => match key.code {
+                    KeyCode::Char(c) => {
+                        input.push(c);
+                        todos[selected as usize].comment = Some(input.clone());
+                    }
+                    KeyCode::Backspace => {
+                        input.pop();
+                        if input.is_empty() {
+                            todos[selected as usize].comment = None;
+                        } else {
+                            todos[selected as usize].comment = Some(input.clone());
+                        }
+                    }
+                    KeyCode::Enter => {
+                        input.push('\n');
+                        todos[selected as usize].comment = Some(input.clone());
+                    }
+                    KeyCode::Esc => {
+                        if input.trim().is_empty() {
+                            todos[selected as usize].comment = None;
+                        }
+                        let _ = save_todos(&todo_file, &todos);
                         mode = Mode::Normal;
                     }
                     _ => {}
