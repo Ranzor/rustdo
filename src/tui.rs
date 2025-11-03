@@ -12,7 +12,9 @@ use ratatui::{
     style::{Color, Style},
     widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap},
 };
+use std::fs;
 use std::io;
+use std::path::Path;
 
 enum Mode {
     Normal,
@@ -21,12 +23,15 @@ enum Mode {
     Commenting(String),
 }
 
-pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
+pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
+
+    let active_style = Style::default().fg(Color::Cyan);
+    let inactive_style = Style::default().fg(Color::DarkGray);
 
     let mut mode = Mode::Normal;
     let mut list_state = ListState::default();
@@ -38,6 +43,18 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
             let is_editing_task = matches!(mode, Mode::Editing(_));
             let is_adding_task = matches!(mode, Mode::Adding(_));
             let is_commenting = matches!(mode, Mode::Commenting(_));
+
+            let tasks_border_style = if is_commenting {
+                inactive_style
+            } else {
+                active_style
+            };
+
+            let details_border_style = if is_commenting {
+                active_style
+            } else {
+                inactive_style
+            };
 
             if todos.is_empty() {
                 let text = Paragraph::new("Press 'a' to start adding tasks")
@@ -69,7 +86,12 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                 .collect();
 
             let list = List::new(items)
-                .block(Block::default().borders(Borders::ALL).title("Tasks"))
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title("Tasks")
+                        .border_style(tasks_border_style),
+                )
                 .highlight_style(Style::default().bg(Color::LightCyan).fg(Color::Black));
             let text = Paragraph::new(match &todos[selected as usize].comment {
                 Some(comment) => {
@@ -95,7 +117,12 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                     )
                 }
             })
-            .block(Block::default().borders(Borders::ALL).title("Details"))
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title("Details")
+                    .border_style(details_border_style),
+            )
             .wrap(Wrap { trim: false });
             frame.render_stateful_widget(list, chunks[0], &mut list_state);
             frame.render_widget(text, chunks[1]);
@@ -185,6 +212,19 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
                             todos[selected as usize].comment.clone().unwrap_or_default();
                         mode = Mode::Commenting(current_comment);
                     }
+                    if key.code == KeyCode::Char('n') {
+                        let new_file = "todos.json";
+
+                        if !Path::new(new_file).exists() {
+                            let empty: Vec<Todo> = Vec::new();
+                            let _ = save_todos(new_file, &empty);
+                        }
+
+                        todos = load_todos(new_file)?;
+                        todo_file = new_file.to_string();
+                        selected = 0;
+                        list_state.select(Some(selected as usize));
+                    }
                 }
                 Mode::Adding(ref mut input) => match key.code {
                     KeyCode::Char(c) => {
@@ -261,4 +301,13 @@ pub fn run_tui(mut todos: Vec<Todo>, todo_file: String) -> io::Result<()> {
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
     Ok(())
+}
+fn load_todos(file_path: &str) -> io::Result<Vec<Todo>> {
+    if Path::new(file_path).exists() {
+        let data = fs::read_to_string(file_path)?;
+        Ok(serde_json::from_str(&data)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?)
+    } else {
+        Ok(Vec::new())
+    }
 }
