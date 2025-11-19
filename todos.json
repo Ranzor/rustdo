@@ -1,0 +1,147 @@
+[
+  {
+    "task": "refactor rustdo in anticipation of TUI mode",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "add edit to rustdo",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "add re-order",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "update available command prompt",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "add seperation of universal and local lists",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "style TUI",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "move savefile to universal location",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "feedback when moving tasks",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "add help command",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "Create TUI mode",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "implement TUI add",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "implement TUI remove",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "implement TUI edit",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "implement TUI comment",
+    "completed": true,
+    "comment": "Commenting on todos might seem like\nExessive. but\n\nIt will alow me to almost implement a SCRUM\nor KANBAN type workflow. IN TERMINAL\nMY WAY! Lol forgot to change mode.\n\nthis should be better. Yeah..\n\nOkay last required feature: Text wrapping.\n\nLet's test. does this wrap? writing a lot of text so it can wrap.. Nice.. very nice. that;s good.\n\n\nHow\n\nAbout\n\nWhen\n\n\nWe\n\nGet\n\nTo\n\nThe\n\nBottom\n\nWhat\n\nIs\n\ntheThat is fine for n"
+  },
+  {
+    "task": "implement TUI move",
+    "completed": true,
+    "comment": null
+  },
+  {
+    "task": "Add a \"cursor\"",
+    "completed": true,
+    "comment": "Adding stuff is hard when you can't\nSee where you are writing. So we should add some form of \"blinking cursor\" i like the vim style cursor so it shouldnt actually blink though. \n\nDone 1/2 Have cursor while adding/edditing but not while commenting\n\nDone 2/2 Now have cursor for both."
+  },
+  {
+    "task": "implement TUI new",
+    "completed": true,
+    "comment": "Create new file. Just the same as in CLI mode. just create a new file. then immediately load that file."
+  },
+  {
+    "task": "implement TUI change list",
+    "completed": false,
+    "comment": "Implement the ability to change between various local lists or the global list. Telescope type popup window that shows all the accessible lists.\n\nStart simple, just a popup with a list.\nSame scrolling behavior as the todo list. press enter (or something) to change file to the selected one.\n\nLater explore adding Telescope style filtering by name"
+  },
+  {
+    "task": "implement TUI delete",
+    "completed": false,
+    "comment": "Delete current local/global file"
+  },
+  {
+    "task": "implement TUI clear",
+    "completed": false,
+    "comment": "Is this required for this?\nIt's a cli feature. so it can be automated..\n\n\nAnd it would probably be nice to be able to do. Even though... removing one by one is much faster in TUI than in CLI so it's less of a necessity.\n\nMight feel redundant when single d removes but maybe more convenient when you need double d to remove."
+  },
+  {
+    "task": "Add colors to TUI",
+    "completed": false,
+    "comment": "I'm thinking color seperation between the left and right pane, and title accent.\n\nGreen checkmarks.\n\nRed X's for incomplete? test it.\n\nVisual frame that is.. both panes.. for destructive commands. so for dd = delete first d turns frame red. 2nd d deletes."
+  },
+  {
+    "task": "Add visual \"prompt\" of delete",
+    "completed": false,
+    "comment": "In the same style as the file changer pop up a window with a prompt for confirmation when deleting file.. possibly also for clearing, mirroriing CLI behaviour."
+  },
+  {
+    "task": "Add visual indication of mode",
+    "completed": false,
+    "comment": "Change the frame color of the \"active\" pane, and which mode it is in\n\nIe.\n\nGreen for add\nYellow for edit\nRed for remove/delete\n\n\nDoes not need to change color for comment since the focus shifts then"
+  },
+  {
+    "task": "Change \"TUI\" mode to enter with no commands?",
+    "completed": true,
+    "comment": "Currently defult \"rustdo\" command shows available commands. This can be limited to the new help command. And the default behavior when not supplying commands is to enter tui mode. So then TUI mode becomes \"default\" and CLI mode is for quick edits and/or automation."
+  },
+  {
+    "task": "Add \"Folders\"",
+    "completed": false,
+    "comment": "A cool feature would be \"Folders\" or Labels..\n\nSo for example for this project where we have multiple different \"parts\" i could sort the todo list in different categories..\n\nLike\n\n\nCLI:\nImplement X Command\nImplement Y Command\n\nTUI:\nImplement X Feature\nMake X Y Color\n\n\netc etc, then maybe even have the ability to \"collapse\" the categories to keep the list clean."
+  },
+  {
+    "task": "Dynamic cursor",
+    "completed": false,
+    "comment": "Just having a visual cursor is a step up from having nothing.\n\nBut.. expecially for the comment field being able to move to different parts of the text without having to remove everything after is would be very nice. Almost a requirement before it becomes mainstream.\n\nBut that begs the question. How..\n\nJust with arrows?\n\n\nOr closer to modal with simple vim motions?"
+  },
+  {
+    "task": "Undo",
+    "completed": false,
+    "comment": "Might be unneccessary when using dd to remove note instead of just d.\n\nBut maybe add undo? would not last between sessions, but when removing a note add it to a \"undo\" vec, and then pressing u puts the last removed task back. Probably good QOL even if you need to press twice to remove a task."
+  },
+  {
+    "task": "Trash",
+    "completed": false,
+    "comment": "\n\nExplore changing remove task from just straight delete to move to trash. if the folder structure is a success, make a default trash folder. when clearing don't clear marked tasks, clear trash instead."
+  },
+  {
+    "task": "Detailed tasks",
+    "completed": false,
+    "comment": "Add more details to tasks.\n\nCurrently my \"Details\" view is just comment.\nBut consider maybe adding more info about the takss like creation date and completed date, should be easy to track and display."
+  }
+]

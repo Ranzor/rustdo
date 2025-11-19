@@ -42,8 +42,9 @@ fn main() {
     };
 
     if args.len() < 2 {
-        println!("Usage: todo <command>");
-        println!("Commands: add, remove, list, done, move, edit, clear, new, delete");
+        if let Err(_) = tui::run_tui(todos, todo_file.clone()) {
+            println!("Failed to enter TUI mode");
+        }
         return;
     }
 
@@ -168,6 +169,7 @@ fn main() {
 
             let task = todos.remove(index_from);
             todos.insert(index_to, task);
+            println!("Moved task {} to position {}", index_from + 1, index_to + 1);
 
             if let Err(msg) = save_todos(&todo_file, &todos) {
                 println!("{}", msg);
@@ -311,15 +313,23 @@ fn main() {
                 }
             }
         }
-        "tui" | "t" => {
+        "help" | "h" | "--help" | "-h" => {
+            println!("Usage: todo <command>");
+            println!("Commands:");
+            println!("  add <task>        Add a new task");
+            println!("  remove <num>      Remove a task by its number");
+            println!("  list              List all tasks");
+            println!("  done <num>        Toggle a task's completion status");
+            println!("  move <from> <to>  Move a task from one position to another");
+            println!("  edit <num> [task] Edit a task's description");
+            println!("  clear [-y]        Clear all completed tasks");
+            println!("  new               Create a new local todo list");
+            println!("  delete            Delete the current todo list");
+        }
+        _ => {
             if let Err(_) = tui::run_tui(todos, todo_file.clone()) {
                 println!("Failed to enter TUI mode");
             }
-        }
-
-        _ => {
-            println!("Unknown command: {}", command);
-            println!("Available commands: add, remove, list, done, move, edit, clear, new, delete");
         }
     }
 }
