@@ -135,7 +135,7 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
             frame.render_stateful_widget(list, chunks[0], &mut list_state);
             frame.render_widget(text, chunks[1]);
 
-            if matches!(mode, Mode::FilePicker) {
+            if matches!(mode, Mode::FilePicker { selected: _ }) {
                 let popup_area = centered_rect(60, 50, frame.area());
 
                 frame.render_widget(Clear, popup_area);
@@ -248,7 +248,7 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
                         list_state.select(Some(selected as usize));
                     }
                     if key.code == KeyCode::Char('f') {
-                        mode = Mode::FilePicker;
+                        mode = Mode::FilePicker { selected: 0 };
                     }
                 }
                 Mode::Adding(ref mut input) => match key.code {
@@ -319,12 +319,13 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
                     }
                     _ => {}
                 },
-                Mode::FilePicker => {
+                Mode::FilePicker { selected: 0 } => {
                     // Future implementation for file picker
                     if key.code == KeyCode::Esc {
                         mode = Mode::Normal;
                     }
                 }
+                _ => {}
             }
         }
     }
