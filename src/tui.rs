@@ -8,9 +8,9 @@ use crate::{Todo, save_todos};
 use ratatui::{
     Terminal,
     backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap},
+    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap},
 };
 use std::fs;
 use std::io;
@@ -21,7 +21,7 @@ enum Mode {
     Adding(String),
     Editing(String),
     Commenting(String),
-    FilePicker,
+    FilePicker { selected: usize },
 }
 
 pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
@@ -38,6 +38,13 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
     let mut list_state = ListState::default();
     let mut selected: i32 = 0;
     list_state.select(Some(selected as usize));
+
+    // temp file list
+    let available_files = vec![
+        "/.todos.json",
+        "/todos.json",
+        "~/projects/website/todos.json",
+    ];
 
     loop {
         terminal.draw(|frame| {
@@ -127,6 +134,20 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
             .wrap(Wrap { trim: false });
             frame.render_stateful_widget(list, chunks[0], &mut list_state);
             frame.render_widget(text, chunks[1]);
+
+            if matches!(mode, Mode::FilePicker) {
+                let popup_area = centered_rect(60, 50, frame.area());
+
+                frame.render_widget(Clear, popup_area);
+
+                let popup = Paragraph::new("File Picker!\n\nPress Esc to close").block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title("Switch List")
+                        .border_style(Style::default().fg(Color::Yellow)),
+                );
+                frame.render_widget(popup, popup_area);
+            }
         })?;
 
         if let Event::Key(key) = event::read()? {
@@ -319,5 +340,20 @@ fn load_todos(file_path: &str) -> io::Result<Vec<Todo>> {
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?)
     } else {
         Ok(Vec::new())
+    }
+}
+
+fn centered_rect(percent_x: u16, percent_y: u16, area: Rect) -> Rect {
+    let popup_width = area.width * percent_x / 100;
+    let popup_height = area.height * percent_y / 100;
+
+    let x = (area.width - popup_width) / 2;
+    let y = (area.height - popup_height) / 2;
+
+    Rect {
+        x: area.x + x,
+        y: area.y + y,
+        width: popup_width,
+        height: popup_height,
     }
 }
