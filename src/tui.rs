@@ -21,6 +21,7 @@ enum Mode {
     Adding(String),
     Editing(String),
     Commenting(String),
+    FilePicker,
 }
 
 pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
@@ -225,6 +226,9 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
                         selected = 0;
                         list_state.select(Some(selected as usize));
                     }
+                    if key.code == KeyCode::Char('f') {
+                        mode = Mode::FilePicker;
+                    }
                 }
                 Mode::Adding(ref mut input) => match key.code {
                     KeyCode::Char(c) => {
@@ -294,6 +298,12 @@ pub fn run_tui(mut todos: Vec<Todo>, mut todo_file: String) -> io::Result<()> {
                     }
                     _ => {}
                 },
+                Mode::FilePicker => {
+                    // Future implementation for file picker
+                    if key.code == KeyCode::Esc {
+                        mode = Mode::Normal;
+                    }
+                }
             }
         }
     }
