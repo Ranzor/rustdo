@@ -327,9 +327,8 @@ fn main() {
             println!("  delete            Delete the current todo list");
         }
         _ => {
-            if let Err(_) = tui::run_tui(todos, todo_file.clone()) {
-                println!("Failed to enter TUI mode");
-            }
+            println!("Unknown command: {}", command);
+            println!("Use 'help' to see available commands.");
         }
     }
 }
