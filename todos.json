@@ -50,27 +50,27 @@
     "comment": null
   },
   {
-    "task": "implement TUI add",
+    "task": "TUI Add",
     "completed": true,
     "comment": null
   },
   {
-    "task": "implement TUI remove",
+    "task": "TUI Remove",
     "completed": true,
     "comment": null
   },
   {
-    "task": "implement TUI edit",
+    "task": "TUI Edit",
     "completed": true,
     "comment": null
   },
   {
-    "task": "implement TUI comment",
+    "task": "TUI Comment",
     "completed": true,
     "comment": "Commenting on todos might seem like\nExessive. but\n\nIt will alow me to almost implement a SCRUM\nor KANBAN type workflow. IN TERMINAL\nMY WAY! Lol forgot to change mode.\n\nthis should be better. Yeah..\n\nOkay last required feature: Text wrapping.\n\nLet's test. does this wrap? writing a lot of text so it can wrap.. Nice.. very nice. that;s good.\n\n\nHow\n\nAbout\n\nWhen\n\n\nWe\n\nGet\n\nTo\n\nThe\n\nBottom\n\nWhat\n\nIs\n\ntheThat is fine for n"
   },
   {
-    "task": "implement TUI move",
+    "task": "TUI Move",
     "completed": true,
     "comment": null
   },
@@ -80,24 +80,34 @@
     "comment": "Adding stuff is hard when you can't\nSee where you are writing. So we should add some form of \"blinking cursor\" i like the vim style cursor so it shouldnt actually blink though. \n\nDone 1/2 Have cursor while adding/edditing but not while commenting\n\nDone 2/2 Now have cursor for both."
   },
   {
-    "task": "implement TUI new",
+    "task": "TUI New",
     "completed": true,
     "comment": "Create new file. Just the same as in CLI mode. just create a new file. then immediately load that file."
   },
   {
-    "task": "implement TUI change list",
+    "task": "TUI Change List",
     "completed": false,
-    "comment": "Implement the ability to change between various local lists or the global list. Telescope type popup window that shows all the accessible lists.\n\nStart simple, just a popup with a list.\nSame scrolling behavior as the todo list. press enter (or something) to change file to the selected one.\n\nLater explore adding Telescope style filtering by name"
+    "comment": "Implement the ability to change between various local lists or the global list. Telescope type popup window that shows all the accessible lists.\n\nStart simple, just a popup with a list.\nSame scrolling behavior as the todo list. press enter (or something) to change file to the selected one.\n\nLater explore adding fuzzy finding?"
   },
   {
-    "task": "implement TUI delete",
+    "task": "TUI Delete",
     "completed": false,
     "comment": "Delete current local/global file"
   },
   {
-    "task": "implement TUI clear",
+    "task": "Status Bar",
     "completed": false,
-    "comment": "Is this required for this?\nIt's a cli feature. so it can be automated..\n\n\nAnd it would probably be nice to be able to do. Even though... removing one by one is much faster in TUI than in CLI so it's less of a necessity.\n\nMight feel redundant when single d removes but maybe more convenient when you need double d to remove."
+    "comment": "\nA VI like status bar that combines Modal information with Zellij like hotkey commands."
+  },
+  {
+    "task": "Modal",
+    "completed": false,
+    "comment": "Make the whole thing modal. Instead of doing everything with hotkeys (although i'd want to keep that)\n\nMake the whole experience modal. I.e in normal mode jk moves up and down in the tasks list, while hl changes between tasks and details. That way entering \"insert\" mode in the active window will start editing where you are.\n\nThis allows us to have a proper cursor and such in the details panel."
+  },
+  {
+    "task": "TUI Clear",
+    "completed": false,
+    "comment": "Is this required for this?\nIt's a cli feature. so it can be automated..\n\n\nAnd it would probably be nice to be able to do. Even though... removing one by one is much faster in TUI than in CLI so it's less of a necessity.\n\nMight feel redundant when single d removes but maybe more convenient when you need double d to remove.\n\nPress once pop up prompt with number of tasks etc. Then press to accept prompt."
   },
   {
     "task": "Add colors to TUI",
@@ -125,6 +135,11 @@
     "comment": "A cool feature would be \"Folders\" or Labels..\n\nSo for example for this project where we have multiple different \"parts\" i could sort the todo list in different categories..\n\nLike\n\n\nCLI:\nImplement X Command\nImplement Y Command\n\nTUI:\nImplement X Feature\nMake X Y Color\n\n\netc etc, then maybe even have the ability to \"collapse\" the categories to keep the list clean."
   },
   {
+    "task": "\"Sub\" tasks",
+    "completed": false,
+    "comment": "Some form of functionality to add nested tasks. I.e\nOne task could be \n\n[] Implement Feature X\n\nthen you can nest smaller tasks required to accomplish this like\n\n[] Implement Feature X\n-- [] Add small feature Y\n-- [] Add small feature Z\n\nYou should also be able to collapse the \"parent\" task"
+  },
+  {
     "task": "Dynamic cursor",
     "completed": false,
     "comment": "Just having a visual cursor is a step up from having nothing.\n\nBut.. expecially for the comment field being able to move to different parts of the text without having to remove everything after is would be very nice. Almost a requirement before it becomes mainstream.\n\nBut that begs the question. How..\n\nJust with arrows?\n\n\nOr closer to modal with simple vim motions?"
@@ -143,5 +158,10 @@
     "task": "Detailed tasks",
     "completed": false,
     "comment": "Add more details to tasks.\n\nCurrently my \"Details\" view is just comment.\nBut consider maybe adding more info about the takss like creation date and completed date, should be easy to track and display."
+  },
+  {
+    "task": "Kanban mode",
+    "completed": false,
+    "comment": "\nTrack \"status\" of a task, not just incomplete - complete, but also \"working\" \"testing\" etc. Start by just adding this under the hood. It will eventually allow us to add \"kanban mode\"\n\nUpon entering Kanban mode the view changes to a kanban board where you can track progress of tasks... Maybe?\n\nThen if you change back to default mode on the same list we just care about incomplete/complete."
   }
 ]
